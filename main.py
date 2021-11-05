@@ -6,9 +6,8 @@ from selenium import webdriver
 from selenium.webdriver.edge.service import Service
 from selenium.webdriver.common.by import By
 import pandas as pd
-from selenium.webdriver.edge.options import Options
-from selenium.webdriver.common.keys import Keys
 import time
+import datetime
 s = Service('edgedriver_win64/msedgedriver.exe')
 driver = webdriver.Edge(service=s)
 
@@ -20,6 +19,15 @@ def aceptarCookies():
         if btn.text == 'Aceptar':
             btnCookie.append(btn)
     btnCookie[0].click()
+
+def generarCSV(data):
+
+    dtNow = datetime.datetime.now()
+    dtFormat = dtNow.strftime('%Y%m%d')
+    # print(dtFormat)
+    nombre = f"DATOS_PLAYLIST_{dtFormat}"
+    dtCSV = data.to_csv(nombre, index_label=False, index=False, sep=';')
+
 def top50():
     btnsMenuNoticias = driver.find_elements(By.CLASS_NAME, 'enlaceMenuNoticias')
     btnTop50 = []
@@ -36,6 +44,7 @@ def obtenerCanciones():
     cancion = []
     for f in filas:
         posicion.append(f.find_element(By.TAG_NAME, 'td').text)
+        # print(f.find_elements(By.TAG_NAME, 'p')[0].text)
         artista.append(f.find_elements(By.TAG_NAME, 'p')[0].text)
         cancion.append(f.find_elements(By.TAG_NAME, 'p')[1].text)
 
@@ -46,7 +55,8 @@ def obtenerCanciones():
     }
 
     dt = pd.DataFrame(playlist)
-    print(dt)
+
+    return dt
 
 
 def obtenerPlayList(url):
@@ -64,8 +74,12 @@ def obtenerPlayList(url):
     """
         Funcion para obtener la playlist de canciones
     """
+    data = obtenerCanciones()
+    """
+        Funcion para generar el CSV
+    """
+    generarCSV(data)
 
-    obtenerCanciones()
 try:
     URL = 'https://www.canalsur.es/radio/canalfiesta-1293.html'
     print("Obtener la playlist")
